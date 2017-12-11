@@ -20,6 +20,7 @@ import com.amazonaws.services.codedeploy.model.ListDeploymentGroupsRequest;
 import com.amazonaws.services.codedeploy.model.ListDeploymentGroupsResult;
 import com.amazonaws.services.codedeploy.model.RevisionLocation;
 import com.amazonaws.services.codedeploy.model.RevisionLocationType;
+import com.amazonaws.services.s3.model.GetBucketAccelerateConfigurationRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.codedeploy.model.BundleType;
 import com.amazonaws.services.codedeploy.model.CreateDeploymentRequest;
@@ -70,7 +71,6 @@ import javax.servlet.ServletException;
 /**
  * The AWS CodeDeploy Publisher is a post-build plugin that adds the ability to start a new CodeDeploy deployment
  * with the project's workspace as the application revision.
- * <p/>
  * To configure, users must create an IAM role that allows "S3" and "CodeDeploy" actions and must be assumable by
  * the globally configured keys. This allows the plugin to get temporary credentials instead of requiring permanent
  * credentials to be configured for each project.
@@ -373,6 +373,8 @@ public class AWSCodeDeployPublisher extends Publisher {
                     key += "/" + zipFile.getName();
                 }
             }
+            String accelerationStatus = aws.s3.getBucketAccelerateConfiguration(new GetBucketAccelerateConfigurationRequest(bucket)).getStatus();
+            logger.println("Acceleration Status = " + accelerationStatus);
             logger.println("Uploading zip to s3://" + bucket + "/" + key);
             PutObjectResult s3result = aws.s3.putObject(bucket, key, zipFile);
 
@@ -495,8 +497,6 @@ public class AWSCodeDeployPublisher extends Publisher {
     /**
      * Descriptor for {@link AWSCodeDeployPublisher}. Used as a singleton.
      * The class is marked as public so that it can be accessed from views.
-     * <p/>
-     * <p/>
      * See <tt>src/main/resources/com/amazonaws/codedeploy/AWSCodeDeployPublisher/*.jelly</tt>
      * for the actual HTML fragment for the configuration screen.
      */

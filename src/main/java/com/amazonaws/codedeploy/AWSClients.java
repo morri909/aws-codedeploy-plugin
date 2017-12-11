@@ -35,6 +35,7 @@ import com.amazonaws.services.codedeploy.model.GetApplicationRequest;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClient;
 import com.amazonaws.services.identitymanagement.model.GetUserResult;
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.S3ClientOptions;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
 import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
@@ -73,6 +74,7 @@ public class AWSClients {
         this.codedeploy = credentials != null ? new AmazonCodeDeployClient(credentials, clientCfg) : new AmazonCodeDeployClient(clientCfg);
         codedeploy.setRegion(Region.getRegion(Regions.fromName(this.region)));
         s3.setRegion(Region.getRegion(Regions.fromName(this.region)));
+        s3.setS3ClientOptions(S3ClientOptions.builder().setAccelerateModeEnabled(true).build());
     }
     
     public static AWSClients fromDefaultCredentialChain(String region, String proxyHost, int proxyPort) {
@@ -90,6 +92,8 @@ public class AWSClients {
     /**
      * Via the default provider chain (i.e., global keys for this Jenkins instance),  return the account ID for the
      * currently authenticated user.
+     * @param proxyHost proxy host
+     * @param proxyPort proxy port
      * @return 12-digit account id
      */
     public static String getAccountId(String proxyHost, int proxyPort) {
